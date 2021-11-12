@@ -112,8 +112,8 @@ int main()
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
 
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
+//    unsigned int EBO;
+//    glGenBuffers(1, &EBO);
 
     // 1. 绑定VAO
     glBindVertexArray(VAO);
@@ -126,8 +126,8 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -140,9 +140,9 @@ int main()
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
