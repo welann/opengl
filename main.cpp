@@ -47,8 +47,6 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    //todo
-    glViewport(0, 0, 800, 600);
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -84,7 +82,7 @@ int main()
 
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
@@ -94,9 +92,18 @@ int main()
     glDeleteShader(fragmentShader);
 
     float vertices[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f,  0.5f, 0.0f
+            -0.9f, -0.5f, 0.0f,  // left
+            -0.0f, -0.5f, 0.0f,  // right
+            -0.45f, 0.5f, 0.0f,  // top
+            // second triangle
+            0.0f, -0.5f, 0.0f,  // left
+            0.9f, -0.5f, 0.0f,  // right
+            0.45f, 0.5f, 0.0f   // top
+    };
+
+    unsigned int indices[] = { // 注意索引从0开始!
+            0, 1, 2, // 第一个三角形
+            3,4,5  // 第二个三角形
     };
 
     unsigned int VBO;
@@ -104,6 +111,9 @@ int main()
 
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
+
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
 
     // 1. 绑定VAO
     glBindVertexArray(VAO);
@@ -116,6 +126,9 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     while(!glfwWindowShouldClose(window))
@@ -127,7 +140,9 @@ int main()
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
