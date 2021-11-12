@@ -91,40 +91,42 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    float vertices[] = {
+    float firstTriangle[] = {
             -0.9f, -0.5f, 0.0f,  // left
             -0.0f, -0.5f, 0.0f,  // right
             -0.45f, 0.5f, 0.0f,  // top
-            // second triangle
+    };
+    float secondTriangle[] = {
             0.0f, -0.5f, 0.0f,  // left
             0.9f, -0.5f, 0.0f,  // right
             0.45f, 0.5f, 0.0f   // top
     };
 
-    unsigned int indices[] = { // 注意索引从0开始!
-            0, 1, 2, // 第一个三角形
-            3,4,5  // 第二个三角形
-    };
+//    unsigned int indices[] = { // 注意索引从0开始!
+//            0, 1, 2, // 第一个三角形
+//            3,4,5  // 第二个三角形
+//    };
 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
+    unsigned int VBOs[2], VAOs[2];
+    glGenVertexArrays(2, VAOs); // we can also generate multiple VAOs or buffers at the same time
+    glGenBuffers(2, VBOs);
 
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-
-//    unsigned int EBO;
-//    glGenBuffers(1, &EBO);
-
-    // 1. 绑定VAO
-    glBindVertexArray(VAO);
-
-    // 0. 复制顶点数组到缓冲中供OpenGL使用
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // 1. 设置顶点属性指针
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    /// first triangle setup
+    // --------------------
+    glBindVertexArray(VAOs[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);	// Vertex attributes stay the same
     glEnableVertexAttribArray(0);
+    // glBindVertexArray(0); // no need to unbind at all as we directly bind a different VAO the next few lines
+    // second triangle setup
+    // ---------------------
+    glBindVertexArray(VAOs[1]);	// note that we bind to a different VAO now
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);	// and a different VBO
+    glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), secondTriangle, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0); // because the vertex data is tightly packed we can also specify 0 as the vertex attribute's stride to let OpenGL figure it out
+    glEnableVertexAttribArray(0);
+    // glBindVertexArray(0); // not really necessary as well, but beware of calls that could affect VAOs while this one is bound (like binding element buffer objects, or enabling/disabling vertex attributes)
 
 //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -139,8 +141,15 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        // then we draw the second triangle using the data from the second VAO
+        glBindVertexArray(VAOs[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+//        glBindVertexArray(VAO);
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 //        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         glfwSwapBuffers(window);
@@ -148,6 +157,11 @@ int main()
     }
 
 
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    glDeleteVertexArrays(2, VAOs);
+    glDeleteBuffers(2, VBOs);
+    glDeleteProgram(shaderProgram);
 
 
     glfwTerminate();
