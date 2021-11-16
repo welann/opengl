@@ -4,6 +4,10 @@
 
 #include "Header/shader_s.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -164,22 +168,29 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        {
-//            t += 0.1f;
-//            if (t > 1.0f)
-//                t = 1.0f;
-            t=0.3f;
-        }
-        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        {
-//            t -= 0.01f;
-//            if (t < 0.0f)
-//                t = 0.0f;
-            t=0.8f;
-        }
+        glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        ourShader.setFloat("t",t);
+//        transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+//        transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
+        ourShader.setMat4("transform",transform);
+/*        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+//        {
+////            t += 0.1f;
+////            if (t > 1.0f)
+////                t = 1.0f;
+//            t=0.3f;
+//        }
+//        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+//        {
+////            t -= 0.01f;
+////            if (t < 0.0f)
+////                t = 0.0f;
+//            t=0.8f;
+//        }
+//
+//        ourShader.setFloat("t",t);*/
         // render container
         ourShader.use();
         glBindVertexArray(VAO);
