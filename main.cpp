@@ -38,6 +38,9 @@ float lastFrame = 0.0f;
 // 但是光源做了个移动的操作，移动到一边了
 glm::vec3 lightPos(1.2f, 2.0f, 2.0f);
 
+// 增加一个新的立方体，它的移动位置
+//glm::vec3 ra(2.2f,2.0f,2.0f);
+
 int main() {
     //初始化
     // glfw: initialize and configure
@@ -156,6 +159,14 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
     glEnableVertexAttribArray(0);
 
+//增加一个新的立方体
+//    unsigned int randcub;
+//    glGenVertexArrays(1,&randcub);
+//    glBindVertexArray(randcub);
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
+//    glEnableVertexAttribArray(0);
+
     //循环
     // render loop
     // -----------
@@ -185,6 +196,24 @@ int main() {
         lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("lightPos", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
+        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // 降低影响
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // 很低的影响
+
+        lightingShader.setVec3("light.ambient", ambientColor);
+        lightingShader.setVec3("light.diffuse", diffuseColor);
+//        lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+//        lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         //mvp矩阵
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,
@@ -215,6 +244,16 @@ int main() {
 
         glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+//        model = glm::mat4(1.0f);
+//        model = glm::translate(model, ra);
+//        model = glm::translate(model, lightPos);
+//        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+//        model = rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
+//        lightCubeShader.setMat4("model", model);
+//        glBindVertexArray(randcub);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
