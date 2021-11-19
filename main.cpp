@@ -169,8 +169,11 @@ int main() {
 
     unsigned int diffuseMap = loadTexture("../resources/textures/container2.png");
 
+    unsigned int specularMap = loadTexture("../resources/textures/container2_specular.png");
+
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
 //增加一个新的立方体
 //    unsigned int randcub;
 //    glGenVertexArrays(1,&randcub);
@@ -216,7 +219,7 @@ int main() {
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         // material properties
-        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+//        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightingShader.setFloat("material.shininess", 64.0f);
 
 
@@ -248,6 +251,9 @@ int main() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
         // render the cube
         glBindVertexArray(cubeVAO);
