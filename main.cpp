@@ -238,9 +238,9 @@ int main() {
         lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-//        lightingShader.setFloat("light.constant",  1.0f);
-//        lightingShader.setFloat("light.linear",    0.09f);
-//        lightingShader.setFloat("light.quadratic", 0.032f);
+        lightingShader.setFloat("light.constant", 1.0f);
+        lightingShader.setFloat("light.linear", 0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
 
         // material properties
         lightingShader.setFloat("material.shininess", 32.0f);
