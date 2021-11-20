@@ -172,7 +172,9 @@ int main() {
     unsigned int specularMap = loadTexture("../resources/textures/container2_specular.png");
 
     lightingShader.use();
+    //在绘制箱子之前，我们希望将要用的纹理单元赋值到material.diffuse这个uniform采样器，并绑定箱子的纹理到这个纹理单元：
     lightingShader.setInt("material.diffuse", 0);
+    //第二个纹理单元绑定
     lightingShader.setInt("material.specular", 1);
 //增加一个新的立方体
 //    unsigned int randcub;
