@@ -88,7 +88,7 @@ int main() {
     // build and compile our shader zprogram
     // ------------------------------------
     Shader lightingShader("../res/colors.vs", "../res/colors.fs");
-    Shader lightCubeShader("../res/light_cube.vs", "../res/light_cube.fs");
+//    Shader lightCubeShader("../res/light_cube.vs", "../res/light_cube.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -136,6 +136,20 @@ int main() {
             -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
             -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
+
+    glm::vec3 cubePositions[] = {
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(2.0f, 5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3(2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f, 3.0f, -7.5f),
+            glm::vec3(1.3f, -2.0f, -2.5f),
+            glm::vec3(1.5f, 2.0f, -2.5f),
+            glm::vec3(1.5f, 0.2f, -1.5f),
+            glm::vec3(-1.3f, 1.0f, -1.5f)
+    };
+
     // first, configure the cube's VAO (and VBO)
     unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
@@ -171,7 +185,7 @@ int main() {
 
     unsigned int specularMap = loadTexture("../resources/textures/container2_specular.png");
 
-    unsigned int radimap = loadTexture("../resources/textures/matrix.jpg");
+//    unsigned int radimap = loadTexture("../resources/textures/matrix.jpg");
 
     lightingShader.use();
     //在绘制箱子之前，我们希望将要用的纹理单元赋值到material.diffuse这个uniform采样器，并绑定箱子的纹理到这个纹理单元：
@@ -179,7 +193,7 @@ int main() {
     //第二个纹理单元绑定
     lightingShader.setInt("material.specular", 1);
     //第三个纹理单元绑定
-    lightingShader.setInt("material.radi", 2);
+//    lightingShader.setInt("material.radi", 2);
 //增加一个新的立方体
 //    unsigned int randcub;
 //    glGenVertexArrays(1,&randcub);
@@ -209,30 +223,34 @@ int main() {
         //清楚上一帧的颜色和深度缓存
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
         //lightingShader的渲染
         // be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
 
         //将变量传到相应的shader变量里面
-        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
         lightingShader.setVec3("viewPos", camera.Position);
+
 
         // light properties
         //ambient 环境光，更改后会变得更亮或者更暗
-        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.setVec3("light.ambient", 0.3f, 0.3f, 0.3f);
         lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-        // material properties
-//        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-        lightingShader.setFloat("material.shininess", 64.0f);
+//        lightingShader.setFloat("light.constant",  1.0f);
+//        lightingShader.setFloat("light.linear",    0.09f);
+//        lightingShader.setFloat("light.quadratic", 0.032f);
 
-        float matrixlight = sin(glfwGetTime());
-        float matrixmove = sin(glfwGetTime());
-        lightingShader.setFloat("matrixlight", 0.1 + matrixlight / 2 + 0.5);
-        lightingShader.setFloat("matrixmove", matrixmove);
+        // material properties
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+/*        //和emission贴图运动起来相关
+//        float matrixlight = sin(glfwGetTime());
+//        float matrixmove = sin(glfwGetTime());
+//        lightingShader.setFloat("matrixlight", 0.1 + matrixlight / 2 + 0.5);
+//        lightingShader.setFloat("matrixmove", matrixmove);
+
 //        glm::vec3 lightColor;
 //        lightColor.x = sin(glfwGetTime() * 2.0f);
 //        lightColor.y = sin(glfwGetTime() * 0.7f);
@@ -247,7 +265,7 @@ int main() {
 ////        lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
 //        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         //mvp矩阵
-        // view/projection transformations
+        // view/projection transformations*/
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,
                                                 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -258,32 +276,42 @@ int main() {
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
 
+        // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
+        // bind specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, radimap);
+
+//        glActiveTexture(GL_TEXTURE2);
+//        glBindTexture(GL_TEXTURE_2D, radimap);
         // render the cube
         glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", model);
 
-        //重新渲染lightCubeShader
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+/*        //重新渲染lightCubeShader
         //如果不用use()的话会无效
         // also draw the lamp object
-        lightCubeShader.use();
-        lightCubeShader.setMat4("projection", projection);
-        lightCubeShader.setMat4("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-        model = rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
-        lightCubeShader.setMat4("model", model);
-
-        glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        lightCubeShader.use();
+//        lightCubeShader.setMat4("projection", projection);
+//        lightCubeShader.setMat4("view", view);
+//        model = glm::mat4(1.0f);
+//        model = glm::translate(model, lightPos);
+//        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+//        model = rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
+//        lightCubeShader.setMat4("model", model);
+//
+//        glBindVertexArray(lightCubeVAO);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 //        model = glm::mat4(1.0f);
 //        model = glm::translate(model, ra);
@@ -292,7 +320,7 @@ int main() {
 //        model = rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
 //        lightCubeShader.setMat4("model", model);
 //        glBindVertexArray(randcub);
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);*/
 
 
 
