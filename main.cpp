@@ -215,9 +215,11 @@ int main()
 
         // 1st. render pass, draw objects as normal, writing to the stencil buffer
         // --------------------------------------------------------------------
+        //允许写入模板
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         // cubes
+        //首先把两个立方体绘制出来
         glBindVertexArray(cubeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
@@ -234,6 +236,8 @@ int main()
         // Because the stencil buffer is now filled with several 1s. The parts of the buffer that are 1 are not drawn, thus only drawing
         // the objects' size differences, making it look like borders.
         // -----------------------------------------------------------------------------------------------------------------------------
+        //停止更改模板
+        //设置显示条件
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
 //        glDisable(GL_DEPTH_TEST);
