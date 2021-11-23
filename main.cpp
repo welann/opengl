@@ -1,4 +1,9 @@
 #include <glad/glad.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 
@@ -59,15 +64,26 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //这个函数把鼠标限制在了窗口中，并且隐藏鼠标标志
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    //初始化imgui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    const char *glsl_version = "#version 330";
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     // configure global opengl state
     // -----------------------------
@@ -193,11 +209,11 @@ int main()
     // --------------------------------
     std::vector<glm::vec3> vegetation
     {
-        glm::vec3(-1.5f, 0.0f, -0.48f),
-        glm::vec3( 1.5f, 0.0f, 0.51f),
-        glm::vec3( 0.0f, 0.0f, 0.7f),
-        glm::vec3(-0.3f, 0.0f, -2.3f),
-        glm::vec3 (0.5f, 0.0f, -0.6f)
+            glm::vec3(-1.5f, 0.0f, -0.48f),
+            glm::vec3( 1.5f, 0.0f, 0.51f),
+            glm::vec3(0.0f, 0.0f, 0.7f),
+            glm::vec3(-0.3f, 0.0f, -2.3f),
+            glm::vec3(0.5f, 0.0f, -0.6f)
     };
 
     // shader configuration
@@ -205,10 +221,32 @@ int main()
     shader.use();
     shader.setInt("texture1", 0);
 
+
+    bool isshow = false;
+
+    float xoffset = 0;
+    float yoffset = 0;
+
     // render loop
     // -----------
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Camera");
+        ImGui::SliderFloat("x", &xoffset, -1.0f, 1.0f);
+        ImGui::SliderFloat("y", &yoffset, -1.0f, 1.0f);
+        ImGui::End();
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
+
+
+//        ImGui::Begin("Operations");
+//        static float rate = 0.0;
+//        ImGui::SliderFloat("rate", &rate, 0.0, 1.0);
+//        ImGui::End();
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -239,7 +277,13 @@ int main()
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+
+        ImGui::Begin("Operations");
+        static float rate = 0.0;
+        ImGui::SliderFloat("rate", &rate, 0.0, 10.0);
+        ImGui::End();
+
+        model = glm::translate(model, glm::vec3(rate, 0.0f, 0.0f));
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         // floor
@@ -253,23 +297,28 @@ int main()
         glBindVertexArray(transparentVAO);
         glBindTexture(GL_TEXTURE_2D, transparentTexture);
 
-        //将透明的物体按从按照距离远近从小到大排序
-        std::map<float, glm::vec3> sorted;
-        for (auto & i : vegetation)
-        {
-            float distance = glm::length(camera.Position - i);
-            sorted[distance] = i;
-        }
+        ImGui::Begin("second");
+        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+        ImGui::Checkbox("show window or hide", &isshow);
+        if (isshow) {
+            //将透明的物体按从按照距离远近从小到大排序
+            std::map<float, glm::vec3> sorted;
+            for (auto &i : vegetation) {
+                float distance = glm::length(camera.Position - i);
+                sorted[distance] = i;
+            }
 
-        //这里按照拍好的序，由远到近绘制，所以用的是rbegin(),rend()这两个迭代器
-        //效果为从后往前遍历
-        for(auto it = sorted.rbegin(); it != sorted.rend(); ++it)
-        {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, it->second);
-            shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            //这里按照拍好的序，由远到近绘制，所以用的是rbegin(),rend()这两个迭代器
+            //效果为从后往前遍历
+            for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, it->second);
+                shader.setMat4("model", model);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
         }
+        ImGui::End();
+
 //        glEnable(GL_CULL_FACE);
         //这是绘制草的图片的代码
 //        for (unsigned int i = 0; i < vegetation.size(); i++)
@@ -296,6 +345,8 @@ int main()
 //
 //        }
 
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -308,6 +359,10 @@ int main()
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &planeVBO);
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
@@ -356,7 +411,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+//    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called

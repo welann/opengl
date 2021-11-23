@@ -13,7 +13,7 @@ project(opengl)
 
 find_package(glad CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-
+find_package(imgui CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
@@ -29,3 +29,4 @@ add_executable(opengl main.cpp glad.c include/shader.h include/stb_image.h stbim
 target_link_libraries(opengl PRIVATE ${ASSIMP_LIBRARIES})
 target_link_libraries(opengl PRIVATE glad::glad)
 target_link_libraries(opengl PRIVATE glfw)
+target_link_libraries(opengl PRIVATE imgui::imgui)
