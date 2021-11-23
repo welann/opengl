@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -71,6 +72,8 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // build and compile shaders
     // -------------------------
@@ -181,7 +184,7 @@ int main()
     // -------------
     unsigned int cubeTexture = loadTexture("../resources/textures/marble.jpg");
     unsigned int floorTexture = loadTexture("../resources/textures/metal.png");
-    unsigned int transparentTexture = loadTexture("../resources/textures/grass.png");
+    unsigned int transparentTexture = loadTexture("../resources/textures/window.png");
 
 
     // transparent vegetation locations
@@ -246,16 +249,35 @@ int main()
         // vegetation
         glBindVertexArray(transparentVAO);
         glBindTexture(GL_TEXTURE_2D, transparentTexture);
-        for (unsigned int i = 0; i < vegetation.size(); i++)
+
+        //将透明的物体按从按照距离远近从小到大排序
+        std::map<float, glm::vec3> sorted;
+        for (auto & i : vegetation)
+        {
+            float distance = glm::length(camera.Position - i);
+            sorted[distance] = i;
+        }
+
+        //这里按照拍好的序，由远到近绘制，所以用的是rbegin(),rend()这两个迭代器
+        //效果为从后往前遍历
+        for(auto it = sorted.rbegin(); it != sorted.rend(); ++it)
         {
             model = glm::mat4(1.0f);
-//            model=glm::rotate(model,glm::radians(90.0f),glm::vec3(0.0, 1.0, 0.0));
-            model = glm::translate(model, vegetation[i]);
-
+            model = glm::translate(model, it->second);
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 6);
-
         }
+        //这是绘制草的图片的代码
+//        for (unsigned int i = 0; i < vegetation.size(); i++)
+//        {
+//            model = glm::mat4(1.0f);
+////            model=glm::rotate(model,glm::radians(90.0f),glm::vec3(0.0, 1.0, 0.0));
+//            model = glm::translate(model, vegetation[i]);
+//
+//            shader.setMat4("model", model);
+//            glDrawArrays(GL_TRIANGLES, 0, 6);
+//
+//        }
         //试图让每个草的图片都各自旋转90度画出一个新的图片出来，好像失败了，因为图片旋转的时候是按照一边来旋转的
         //所以最终会有错位，需要最后转换一下位置
 //        for (unsigned int i = 0; i < vegetation.size(); i++)
