@@ -20,28 +20,33 @@
 #include <vector>
 #include <map>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
 void processInput(GLFWwindow *window);
+
 unsigned int loadTexture(const char *path);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = (float)SCR_WIDTH  / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
+float lastX = (float) SCR_WIDTH / 2.0;
+float lastY = (float) SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-int main()
-{
+bool FollowMouse = false;
+
+int main() {
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -222,10 +227,8 @@ int main()
     shader.setInt("texture1", 0);
 
 
-    bool isshow = false;
+    bool isshow = true;
 
-    float xoffset = 0;
-    float yoffset = 0;
 
     // render loop
     // -----------
@@ -235,12 +238,6 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Camera");
-        ImGui::SliderFloat("x", &xoffset, -1.0f, 1.0f);
-        ImGui::SliderFloat("y", &yoffset, -1.0f, 1.0f);
-        ImGui::End();
-
-        camera.ProcessMouseMovement(xoffset, yoffset);
 
 
 //        ImGui::Begin("Operations");
@@ -396,22 +393,34 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    //按下O的话就让镜头和鼠标一起运动
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+        FollowMouse = true;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    //按下p的话就让镜头和鼠标分离，方便操作菜单栏
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        FollowMouse = false;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    if (FollowMouse) {
+        if (firstMouse) {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
 
-    lastX = xpos;
-    lastY = ypos;
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
-//    camera.ProcessMouseMovement(xoffset, yoffset);
+        lastX = xpos;
+        lastY = ypos;
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
+
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
