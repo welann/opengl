@@ -298,7 +298,9 @@ int main() {
 
     // load textures
     // -------------
+    unsigned int cubeTexture1 = loadTexture("../resources/textures/container.jpg");
     unsigned int cubeTexture = loadTexture("../resources/textures/marble.jpg");
+
 
     std::vector<std::string> faces{
             "../resources/textures/skybox/right.jpg",
@@ -312,6 +314,14 @@ int main() {
 
     // shader configuration
     // --------------------
+    //每个shader对应的纹理单元设置为某个值那么在使用
+    //glActiveTexture(GL_TEXTURE0);
+    //时就要激活对应的纹理单元
+    //然后glBindTexture(GL_TEXTURE_2D, cubeTexture);就会将纹理关联到这个纹理单元里
+    //368-373行大概就是这个方面的内容
+    //如果只将cubeTexture变为cubeTexture1的话那么纹理就会变成cubeTexture1关联的图像
+    //但是如果修改了GL_TEXTURE0变为GL_TEXTURE1的话（此时shader.setint内容未改变），那么纹理就会加载不出来
+    //变成一个黑色的箱子
     cub.use();
     cub.setInt("texture1", 0);
 
