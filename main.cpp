@@ -74,6 +74,7 @@ int main() {
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -117,6 +118,7 @@ int main() {
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     // build and compile shaders
     // -------------------------
@@ -404,18 +406,18 @@ int main() {
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 
-        glBindVertexArray(cubeVAO[1]);
-        shaderRed.use();
+//        glBindVertexArray(cubeVAO[1]);
+//        shaderRed.use();
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-0.75f, 0.75f, 0.0f)); // move top-left
-        shaderRed.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        shaderGreen.use();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.75f, 0.75f, 0.0f)); // move top-right
-        shaderGreen.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        model = glm::translate(model, glm::vec3(-0.75f, 0.75f, 0.0f)); // move top-left
+//        shaderRed.setMat4("model", model);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+//
+//        shaderGreen.use();
+//        model = glm::mat4(1.0f);
+//        model = glm::translate(model, glm::vec3(0.75f, 0.75f, 0.0f)); // move top-right
+//        shaderGreen.setMat4("model", model);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
