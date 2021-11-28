@@ -167,15 +167,14 @@ int main() {
             translations[index++] = translation;
         }
     }
-//    shader.use();
-//    for(unsigned int i = 0; i < 100; i++)
-//    {
-//        std::stringstream ss;
-//        std::string index;
-//        ss << i;
-//        index = ss.str();
-//        shader.setVec2("offsets[" + index + "]", translations[i]);
-//    }
+    shader.use();
+    for (unsigned int i = 0; i < 100; i++) {
+        std::stringstream ss;
+        std::string index;
+        ss << i;
+        index = ss.str();
+        shader.setVec2("offsets[" + index + "]", translations[i]);
+    }
 
 
     // render loop
