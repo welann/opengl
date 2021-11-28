@@ -18,5 +18,8 @@ void main()
 {
 //     float depth = LinearizeDepth(gl_FragCoord.z) / far; // 为了演示除以 far
 //     FragColor = vec4(vec3(depth), 1.0);
-    FragColor = texture(texture1, TexCoords);
+if(gl_FragCoord.x < 400)
+        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    else
+        FragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }
