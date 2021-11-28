@@ -9,6 +9,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "include/shader_s.h"
 #include "include/camera.h"
@@ -124,6 +125,12 @@ int main() {
     Shader skyboxShader("../res/skybox/skybox.vs", "../res/skybox/skybox.fs");
 
     Shader cub("../res/advance/depth_testing.vs", "../res/advance/depth_testing.fs");
+
+    Shader shaderRed("../res/advanceglsl/advanced_glsl.vs", "../res/advanceglsl/red.fs");
+    Shader shaderGreen("../res/advanceglsl/advanced_glsl.vs", "../res/advanceglsl/green.fs");
+    Shader shaderBlue("../res/advanceglsl/advanced_glsl.vs", "../res/advanceglsl/blue.fs");
+    Shader shaderYellow("../res/advanceglsl/advanced_glsl.vs", "../res/advanceglsl/yellow.fs");
+
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
@@ -296,6 +303,38 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
 
 
+    // configure a uniform buffer object
+    // ---------------------------------
+    // first. We get the relevant block indices
+    //从OpenGL 4.2版本起，才有这个特性，所以
+    //
+    //在.vs文件里要设置#version 420 core
+    //
+//    unsigned int uniformBlockIndexRed = glGetUniformBlockIndex(shaderRed.ID, "Matrices");
+//    unsigned int uniformBlockIndexGreen = glGetUniformBlockIndex(shaderGreen.ID, "Matrices");
+//    unsigned int uniformBlockIndexBlue = glGetUniformBlockIndex(shaderBlue.ID, "Matrices");
+//    unsigned int uniformBlockIndexYellow = glGetUniformBlockIndex(shaderYellow.ID, "Matrices");
+    // //then we link each shader's uniform block to this uniform binding point
+//    glUniformBlockBinding(shaderRed.ID, uniformBlockIndexRed, 0);
+//    glUniformBlockBinding(shaderGreen.ID, uniformBlockIndexGreen, 0);
+//    glUniformBlockBinding(shaderBlue.ID, uniformBlockIndexBlue, 0);
+//    glUniformBlockBinding(shaderYellow.ID, uniformBlockIndexYellow, 0);
+    // Now actually create the buffer
+    unsigned int uboMatrices;
+    glGenBuffers(1, &uboMatrices);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    // define the range of the buffer that links to a uniform binding point
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+    // store the projection matrix (we only do this once now) (note: we're not using zoom anymore by changing the FoV)
+    glm::mat4 projection = glm::perspective(45.0f, (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
     // load textures
     // -------------
     unsigned int cubeTexture1 = loadTexture("../resources/textures/container.jpg");
@@ -357,11 +396,33 @@ int main() {
         // make sure we clear the framebuffer's content
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //这里需要先把view的值设置好才能显示。
+        glm::mat4 view = camera.GetViewMatrix();
+        glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+        glBindVertexArray(cubeVAO[1]);
+        shaderRed.use();
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.75f, 0.75f, 0.0f)); // move top-left
+        shaderRed.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        shaderGreen.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.75f, 0.75f, 0.0f)); // move top-right
+        shaderGreen.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+
 
         // draw scene as normal
         cub.use();
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera.GetViewMatrix();
+        model = glm::mat4(1.0f);
+        view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,
                                                 100.0f);
         cub.setMat4("view", view);
