@@ -383,6 +383,10 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        if (ImGui::Begin("My First Window")) {
+            ImGui::Text("Hello Dear ImGui!");
+        }
+        ImGui::End();
 
 
         // per-frame time logic
@@ -418,7 +422,6 @@ int main() {
 //        model = glm::translate(model, glm::vec3(0.75f, 0.75f, 0.0f)); // move top-right
 //        shaderGreen.setMat4("model", model);
 //        glDrawArrays(GL_TRIANGLES, 0, 36);
-
 
 
 
