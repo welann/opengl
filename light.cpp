@@ -17,6 +17,7 @@
 
 
 #include <iostream>
+#include <string>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -140,7 +141,14 @@ int main() {
 
     // lighting info
     // -------------
-    glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+//    glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+    glm::vec3 lightPositions[] = {
+            glm::vec3(-3.0f, 0.0f, 0.0f),
+            glm::vec3(-1.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 0.0f, 0.0f),
+            glm::vec3(3.0f, 0.0f, 0.0f)
+    };
+
 
     // render loop
     // -----------
@@ -156,7 +164,7 @@ int main() {
 //        ImGui::End();
 
         ImGui::Begin("select model");
-        ImGui::Checkbox("blinn-phong model", &blinnKeyPressed);
+        ImGui::Checkbox("model", &blinnKeyPressed);
 
         if (blinnKeyPressed) {
             ImGui::Text("this is blinn-phong light");
@@ -191,7 +199,10 @@ int main() {
         shader.setMat4("view", view);
         // set light uniforms
         shader.setVec3("viewPos", camera.Position);
-        shader.setVec3("lightPos", lightPos);
+        for (int i = 0; i < 4; i++) {
+            shader.setVec3("lightPos[" + std::to_string(i) + "]", lightPositions[i]);
+        }
+
         shader.setInt("blinn", blinn);
         // floor
         glBindVertexArray(planeVAO);
